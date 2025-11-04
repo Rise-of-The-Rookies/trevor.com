@@ -90,20 +90,23 @@ export function InvitationManager({ organizationId, userRole }: InvitationManage
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      const { data, error } = await supabase
-        .from('org_invites')
-        .insert({
-          organization_id: organizationId,
-          role: newInvite.role,
-          email: newInvite.email || null,
-          created_by: user.id,
-        })
-        .select()
-        .single();
+      // Use the database function to create invite (bypasses RLS)
+      const { data, error } = await supabase.rpc('create_org_invite', {
+        p_organization_id: organizationId,
+        p_role: newInvite.role,
+        p_email: newInvite.email || null,
+      });
 
       if (error) throw error;
+      
+      // The function returns an array, so get the first item
+      const inviteData = Array.isArray(data) && data.length > 0 ? data[0] : data;
 
-      setInvitations(prev => [data, ...prev]);
+      if (!inviteData) {
+        throw new Error("Failed to create invitation");
+      }
+
+      setInvitations(prev => [inviteData, ...prev]);
       setNewInvite({ role: "employee", email: "" });
       setIsDialogOpen(false);
       
