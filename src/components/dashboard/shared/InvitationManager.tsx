@@ -87,12 +87,16 @@ export function InvitationManager({ organizationId, userRole }: InvitationManage
     
     setCreating(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
         .from('org_invites')
         .insert({
           organization_id: organizationId,
           role: newInvite.role,
           email: newInvite.email || null,
+          created_by: user.id,
         })
         .select()
         .single();

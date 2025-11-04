@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/enhanced-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,11 +67,151 @@ function OnlinePresenceComponent({ organizationId }: OnlinePresenceProps) {
   });
   const [loading, setLoading] = useState(true);
   const [currentUserStatus, setCurrentUserStatus] = useState<"online" | "idle" | "offline" | "do_not_disturb">("online");
+  
+  // Track if we're currently fetching to prevent duplicate calls
+  const isFetchingRef = useRef(false);
+  const currentUserIdRef = useRef<string | null>(null);
+
+  // Get current user ID once
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        currentUserIdRef.current = user.id;
+      }
+    });
+  }, []);
+
+  const fetchOnlineUsers = useCallback(async () => {
+    // Prevent duplicate calls
+    if (isFetchingRef.current) {
+      return;
+    }
+    
+    isFetchingRef.current = true;
+    try {
+      // Removed console.log for production
+      
+      // First, let's try a simple query to get organization members
+      const { data: membersData, error: membersError } = await supabase
+        .from('organization_members')
+        .select('user_id, role')
+        .eq('organization_id', organizationId);
+      
+      if (membersError) {
+        console.error('Error fetching organization members:', membersError);
+        throw membersError;
+      }
+      
+      if (!membersData || membersData.length === 0) {
+        setOnlineUsers({
+          owner: [],
+          admin: [],
+          supervisor: [],
+          employee: [],
+        });
+        return;
+      }
+      
+      // Get user details for each member
+      const userIds = membersData.map(member => member.user_id);
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('id, full_name, email, avatar_url')
+        .in('id', userIds);
+      
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        throw usersError;
+      }
+      
+      // Get attendance data for today
+      const today = new Date().toISOString().split('T')[0];
+      const { data: attendanceData, error: attendanceError } = await supabase
+        .from('attendance_checkins')
+        .select('user_id, clock_in_at, clock_out_at, local_date')
+        .eq('org_id', organizationId)
+        .eq('local_date', today);
+      
+      // Get presence data
+      const { data: presenceData, error: presenceError } = await supabase
+        .from('user_presence')
+        .select('user_id, status, updated_at, current_task_id')
+        .in('user_id', userIds);
+
+      const usersByRole: Record<UserRole, OnlineUser[]> = {
+        owner: [],
+        admin: [],
+        supervisor: [],
+        employee: [],
+      };
+      
+      membersData.forEach((member: any) => {
+        const user = usersData?.find(u => u.id === member.user_id);
+        if (!user) return;
+        
+        const attendance = attendanceData?.find(a => a.user_id === member.user_id);
+        const presence = presenceData?.find(p => p.user_id === member.user_id);
+        
+        // Determine user status based on attendance and activity
+        let userStatus: "online" | "idle" | "offline" | "do_not_disturb" = 'offline';
+        
+        // Check if user is currently clocked in (no clock_out_at for today)
+        const isClockedIn = attendance && 
+          attendance.clock_in_at && 
+          !attendance.clock_out_at;
+        
+        if (isClockedIn) {
+          // User is clocked in, determine status based on activity
+          if (presence?.updated_at) {
+            const timeSinceUpdate = Date.now() - new Date(presence.updated_at).getTime();
+            const twentyMinutes = 20 * 60 * 1000; // 20 minutes for idle
+            
+            if (timeSinceUpdate < twentyMinutes) {
+              // Recent activity - use the stored status or default to online
+              userStatus = presence.status as "online" | "idle" | "offline" | "do_not_disturb" || 'online';
+            } else {
+              // Idle if no activity for more than 20 minutes
+              userStatus = 'idle';
+            }
+          } else {
+            // No presence data, default to online if clocked in
+            userStatus = 'online';
+          }
+        } else {
+          // User is not clocked in or has clocked out
+          userStatus = 'offline';
+        }
+        
+        const onlineUser: OnlineUser = {
+          id: user.id,
+          full_name: user.full_name,
+          email: user.email,
+          avatar_url: user.avatar_url,
+          role: member.role,
+          status: userStatus,
+          current_task_id: presence?.current_task_id,
+          current_task_title: undefined, // We'll add task fetching later if needed
+        };
+
+        usersByRole[member.role as UserRole].push(onlineUser);
+      });
+
+      setOnlineUsers(usersByRole);
+    } catch (error) {
+      console.error('Error fetching online users:', error);
+    } finally {
+      setLoading(false);
+      isFetchingRef.current = false;
+    }
+  }, [organizationId]);
 
   useEffect(() => {
+    if (!organizationId) return;
+    
     fetchOnlineUsers();
     
     // Set up real-time subscription for presence updates
+    // Only react to changes from other users to avoid infinite loops
     const channel = supabase
       .channel('presence-changes')
       .on(
@@ -81,8 +221,14 @@ function OnlinePresenceComponent({ organizationId }: OnlinePresenceProps) {
           schema: 'public',
           table: 'user_presence'
         },
-        () => {
-          fetchOnlineUsers();
+        (payload) => {
+          // Only refresh if it's a change from another user
+          if (payload.new && (payload.new as any).user_id !== currentUserIdRef.current) {
+            // Debounce: wait a bit before fetching to avoid rapid successive calls
+            setTimeout(() => {
+              fetchOnlineUsers();
+            }, 1000);
+          }
         }
       )
       .subscribe();
@@ -135,137 +281,7 @@ function OnlinePresenceComponent({ organizationId }: OnlinePresenceProps) {
         document.removeEventListener(event, resetIdleTimer, true);
       });
     };
-  }, [organizationId]);
-
-  const fetchOnlineUsers = async () => {
-    try {
-      console.log('Fetching users for organization:', organizationId);
-      
-      // First, let's try a simple query to get organization members
-      const { data: membersData, error: membersError } = await supabase
-        .from('organization_members')
-        .select('user_id, role')
-        .eq('organization_id', organizationId);
-      
-      console.log('Simple members query:', { membersData, membersError });
-      
-      if (membersError) {
-        console.error('Error fetching organization members:', membersError);
-        throw membersError;
-      }
-      
-      if (!membersData || membersData.length === 0) {
-        console.log('No organization members found');
-        setOnlineUsers({
-          owner: [],
-          admin: [],
-          supervisor: [],
-          employee: [],
-        });
-        return;
-      }
-      
-      // Get user details for each member
-      const userIds = membersData.map(member => member.user_id);
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('id, full_name, email, avatar_url')
-        .in('id', userIds);
-      
-      console.log('Users query:', { usersData, usersError });
-      
-      if (usersError) {
-        console.error('Error fetching users:', usersError);
-        throw usersError;
-      }
-      
-      // Get attendance data for today
-      const today = new Date().toISOString().split('T')[0];
-      const { data: attendanceData, error: attendanceError } = await supabase
-        .from('attendance_checkins')
-        .select('user_id, clock_in_at, clock_out_at, local_date')
-        .eq('org_id', organizationId)
-        .eq('local_date', today);
-      
-      console.log('Attendance query:', { attendanceData, attendanceError });
-      
-      // Get presence data
-      const { data: presenceData, error: presenceError } = await supabase
-        .from('user_presence')
-        .select('user_id, status, updated_at, current_task_id')
-        .in('user_id', userIds);
-      
-      console.log('Presence query:', { presenceData, presenceError });
-
-      const usersByRole: Record<UserRole, OnlineUser[]> = {
-        owner: [],
-        admin: [],
-        supervisor: [],
-        employee: [],
-      };
-
-      console.log('Processing members:', membersData.length, 'members found');
-      
-      membersData.forEach((member: any) => {
-        const user = usersData?.find(u => u.id === member.user_id);
-        if (!user) return;
-        
-        const attendance = attendanceData?.find(a => a.user_id === member.user_id);
-        const presence = presenceData?.find(p => p.user_id === member.user_id);
-        
-        // Determine user status based on attendance and activity
-        let userStatus: "online" | "idle" | "offline" | "do_not_disturb" = 'offline';
-        
-        // Check if user is currently clocked in (no clock_out_at for today)
-        const isClockedIn = attendance && 
-          attendance.clock_in_at && 
-          !attendance.clock_out_at;
-        
-        if (isClockedIn) {
-          // User is clocked in, determine status based on activity
-          if (presence?.updated_at) {
-            const timeSinceUpdate = Date.now() - new Date(presence.updated_at).getTime();
-            const twentyMinutes = 20 * 60 * 1000; // 20 minutes for idle
-            
-            if (timeSinceUpdate < twentyMinutes) {
-              // Recent activity - use the stored status or default to online
-              userStatus = presence.status as "online" | "idle" | "offline" | "do_not_disturb" || 'online';
-            } else {
-              // Idle if no activity for more than 20 minutes
-              userStatus = 'idle';
-            }
-          } else {
-            // No presence data, default to online if clocked in
-            userStatus = 'online';
-          }
-        } else {
-          // User is not clocked in or has clocked out
-          userStatus = 'offline';
-        }
-        
-        const onlineUser: OnlineUser = {
-          id: user.id,
-          full_name: user.full_name,
-          email: user.email,
-          avatar_url: user.avatar_url,
-          role: member.role,
-          status: userStatus,
-          current_task_id: presence?.current_task_id,
-          current_task_title: undefined, // We'll add task fetching later if needed
-        };
-
-        console.log('Created user:', onlineUser);
-        usersByRole[member.role as UserRole].push(onlineUser);
-      });
-
-      console.log('Final users by role:', usersByRole);
-      setOnlineUsers(usersByRole);
-    } catch (error) {
-      console.error('Error fetching online users:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [organizationId, fetchOnlineUsers]);
 
   const updatePresence = async (status: "online" | "idle" | "offline" | "do_not_disturb" = "online") => {
     try {
