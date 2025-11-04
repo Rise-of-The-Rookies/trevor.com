@@ -194,11 +194,14 @@ export function ProjectDetail() {
 
   const fetchProjectDetails = async () => {
     try {
+      if (!organization) return;
+      
       // Fetch project details
       const { data: projectData, error: projectError } = await supabase
         .from("projects")
         .select("*")
         .eq("name", projectName)
+        .eq("organization_id", organization.id)
         .single();
 
       if (projectError) throw projectError;

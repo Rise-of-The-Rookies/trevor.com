@@ -161,6 +161,8 @@ export function ProjectDetail() {
 
   const fetchProjectDetails = async () => {
     try {
+      if (!organization) return;
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -168,6 +170,7 @@ export function ProjectDetail() {
         .from("projects")
         .select("*")
         .eq("name", projectName)
+        .eq("organization_id", organization.id)
         .single();
 
       if (projectError) throw projectError;

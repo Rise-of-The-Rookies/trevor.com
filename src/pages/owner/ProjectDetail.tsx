@@ -228,6 +228,8 @@ export function ProjectDetail() {
 
   const fetchProjectDetails = async () => {
     try {
+      if (!organization) return;
+      
       // Fetch project details by name first
       let projectData;
       let projectError;
@@ -236,6 +238,7 @@ export function ProjectDetail() {
         .from("projects")
         .select("*")
         .eq("name", projectName)
+        .eq("organization_id", organization.id)
         .single();
       
       projectData = data;

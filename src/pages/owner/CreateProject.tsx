@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ export default function CreateProject() {
   const { toast } = useToast();
   const { organization } = useOrganization();
   const [loading, setLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [checkingName, setCheckingName] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -31,6 +33,55 @@ export default function CreateProject() {
     "Deployment Phase",
     "Maintenance Phase"
   ];
+
+  // Check for duplicate project names in the same organization
+  useEffect(() => {
+    const checkDuplicateName = async () => {
+      // Reset error if name is empty
+      if (!formData.name.trim()) {
+        setNameError("");
+        return;
+      }
+
+      // Don't check if organization is not available
+      if (!organization) {
+        return;
+      }
+
+      setCheckingName(true);
+      try {
+        const { data, error } = await supabase
+          .from("projects")
+          .select("id, name")
+          .eq("name", formData.name.trim())
+          .eq("organization_id", organization.id)
+          .maybeSingle();
+
+        if (error && error.code !== "PGRST116") {
+          // PGRST116 is "no rows returned" which is expected when no duplicate exists
+          console.error("Error checking duplicate name:", error);
+          return;
+        }
+
+        if (data) {
+          setNameError("This project name has been used, try another one");
+        } else {
+          setNameError("");
+        }
+      } catch (error) {
+        console.error("Error checking duplicate name:", error);
+      } finally {
+        setCheckingName(false);
+      }
+    };
+
+    // Debounce the check to avoid too many API calls
+    const timeoutId = setTimeout(() => {
+      checkDuplicateName();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [formData.name, organization]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +99,15 @@ export default function CreateProject() {
       toast({
         title: "Error",
         description: "Project name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (nameError) {
+      toast({
+        title: "Error",
+        description: nameError,
         variant: "destructive",
       });
       return;
@@ -139,11 +199,18 @@ export default function CreateProject() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Enter project name"
                   required
-                  disabled={loading}
+                  disabled={loading || checkingName}
+                  className={nameError ? "border-destructive" : ""}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Choose a clear, descriptive name for your project
-                </p>
+                {nameError ? (
+                  <p className="text-xs text-destructive">
+                    {nameError}
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Choose a clear, descriptive name for your project
+                  </p>
+                )}
               </div>
 
               {/* Project Description */}
@@ -212,7 +279,7 @@ export default function CreateProject() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={loading || !organization}>
+                <Button type="submit" disabled={loading || !organization || !!nameError || checkingName}>
                   {loading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2" />
