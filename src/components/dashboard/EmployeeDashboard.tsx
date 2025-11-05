@@ -553,9 +553,9 @@ export function EmployeeDashboard({ organization, onLogout, onClockOut }: Employ
                     </Link>
                   </Button>
                   <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                    <Link to="/employee/shop">
-                      <Gift className="w-6 h-6" />
-                      <span>Rewards Shop</span>
+                    <Link to="/employee/teams">
+                      <Users className="w-6 h-6" />
+                      <span>Teams</span>
                     </Link>
                   </Button>
                   <Button variant="outline" className="h-20 flex-col gap-2" asChild>
@@ -577,9 +577,9 @@ export function EmployeeDashboard({ organization, onLogout, onClockOut }: Employ
                     </Link>
                   </Button>
                   <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                    <Link to="/employee/teams">
-                      <Users className="w-6 h-6" />
-                      <span>Teams</span>
+                    <Link to="/employee/shop">
+                      <Gift className="w-6 h-6" />
+                      <span>Rewards Shop</span>
                     </Link>
                   </Button>
                 </div>
