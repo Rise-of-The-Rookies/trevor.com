@@ -186,19 +186,19 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "extension_requested":
-        return <CalendarClock className="w-5 h-5 text-primary" />;
+        return <CalendarClock className="w-5 h-5 text-primary dark:text-primary" />;
       case "extension_approved":
-        return <CheckCircle2 className="w-5 h-5 text-green-600" />;
+        return <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />;
       case "extension_rejected":
-        return <XCircle className="w-5 h-5 text-red-600" />;
+        return <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />;
       case "task_assigned":
-        return <UserPlus className="w-5 h-5 text-blue-600" />;
+        return <UserPlus className="w-5 h-5 text-blue-600 dark:text-blue-400" />;
       case "task_due_reminder":
-        return <AlertTriangle className="w-5 h-5 text-orange-600" />;
+        return <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400" />;
       case "points_earned":
-        return <Coins className="w-5 h-5 text-yellow-600" />;
+        return <Coins className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />;
       case "member_joined":
-        return <Users className="w-5 h-5 text-purple-600" />;
+        return <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />;
       default:
         return <Bell className="w-5 h-5 text-muted-foreground" />;
     }
@@ -207,21 +207,21 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const getNotificationColor = (type: string) => {
     switch (type) {
       case "extension_requested":
-        return "bg-primary/10 border-primary/20";
+        return "bg-primary/10 border-primary/20 dark:bg-primary/20 dark:border-primary/30";
       case "extension_approved":
-        return "bg-green-50 border-green-200";
+        return "bg-green-50 border-green-200 dark:bg-green-950/50 dark:border-green-800/50";
       case "extension_rejected":
-        return "bg-red-50 border-red-200";
+        return "bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800/50";
       case "task_assigned":
-        return "bg-blue-50 border-blue-200";
+        return "bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800/50";
       case "task_due_reminder":
-        return "bg-orange-50 border-orange-200";
+        return "bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800/50";
       case "points_earned":
-        return "bg-yellow-50 border-yellow-200";
+        return "bg-yellow-50 border-yellow-200 dark:bg-yellow-950/50 dark:border-yellow-800/50";
       case "member_joined":
-        return "bg-purple-50 border-purple-200";
+        return "bg-purple-50 border-purple-200 dark:bg-purple-950/50 dark:border-purple-800/50";
       default:
-        return "bg-muted/50 border-muted";
+        return "bg-muted/50 border-muted dark:bg-muted dark:border-muted";
     }
   };
 
@@ -387,32 +387,32 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                       {getNotificationIcon(notification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium mb-1">
+                      <p className="text-sm font-medium mb-1 text-foreground dark:text-foreground">
                         {notification.payload.message}
                       </p>
                       {notification.payload.decision_note && (
-                        <p className="text-xs text-muted-foreground mb-2 italic">
+                        <p className="text-xs text-muted-foreground dark:text-muted-foreground mb-2 italic">
                           Note: {notification.payload.decision_note}
                         </p>
                       )}
                       {notification.payload.task_type && (
-                        <p className="text-xs text-muted-foreground mb-1">
+                        <p className="text-xs text-muted-foreground dark:text-muted-foreground mb-1">
                           Type: {notification.payload.task_type === 'assignment' ? 'Assignment' : 'Task'}
                           {notification.payload.priority && ` • Priority: ${notification.payload.priority}`}
                         </p>
                       )}
                       {notification.payload.due_date && (
-                        <p className="text-xs text-muted-foreground mb-1">
+                        <p className="text-xs text-muted-foreground dark:text-muted-foreground mb-1">
                           Due: {new Date(notification.payload.due_date).toLocaleDateString()}
                         </p>
                       )}
                       {notification.payload.points && (
-                        <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                        <p className="text-xs text-muted-foreground dark:text-muted-foreground mb-1 flex items-center gap-1">
                           <Coins className="w-3 h-3" />
                           <span>{notification.payload.points} points earned</span>
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                         {formatDistanceToNow(new Date(notification.created_at), {
                           addSuffix: true,
                         })}
