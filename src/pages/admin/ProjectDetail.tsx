@@ -774,6 +774,10 @@ export function ProjectDetail() {
                       <span className="font-medium">{stats.totalTasks}</span>
                     </div>
                     <div className="flex justify-between">
+                      <span className="text-muted-foreground">Total Assignments</span>
+                      <span className="font-medium">{stats.totalAssignments || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
                       <span className="text-muted-foreground">Completed</span>
                       <span className="font-medium text-green-600">{stats.completedTasks}</span>
                     </div>
