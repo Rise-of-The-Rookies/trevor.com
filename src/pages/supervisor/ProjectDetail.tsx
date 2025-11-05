@@ -378,12 +378,21 @@ export function ProjectDetail() {
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from("tasks")
         .delete()
-        .eq("id", taskId);
+        .eq("id", taskId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting task:", error);
+        throw error;
+      }
+
+      // Verify the task was actually deleted
+      if (!data || data.length === 0) {
+        throw new Error("Task deletion failed - no rows were deleted");
+      }
 
       toast({
         title: "Success",
@@ -391,11 +400,11 @@ export function ProjectDetail() {
       });
 
       fetchProjectDetails();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting task:", error);
       toast({
         title: "Error",
-        description: "Failed to delete task",
+        description: error.message || "Failed to delete task. Please try again.",
         variant: "destructive",
       });
     }

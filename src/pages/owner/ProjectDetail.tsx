@@ -163,7 +163,8 @@ export function ProjectDetail() {
   }, [project?.current_phase]);
 
   const filteredTasks = useMemo(() => {
-    let list = tasks;
+    // Filter to only show tasks (not assignments) in the tasks tab
+    let list = tasks.filter(t => !t.task_type || t.task_type === 'task');
     
     if (filterStatus !== "all") {
       list = list.filter(t => t.status === filterStatus);
@@ -261,7 +262,7 @@ export function ProjectDetail() {
       if (projectError) throw projectError;
       setProject(projectData);
 
-      // Fetch project tasks with assignee information
+      // Fetch project tasks with assignee information (only tasks, not assignments)
       const { data: tasksData, error: tasksError } = await supabase
         .from("tasks")
         .select(`
@@ -273,12 +274,14 @@ export function ProjectDetail() {
           due_date,
           created_at,
           assignee_id,
+          task_type,
           assignee:users!tasks_assignee_id_fkey(
             full_name,
             email
           )
         `)
         .eq("project_id", projectData.id)
+        .eq("task_type", "task")
         .order("created_at", { ascending: false });
 
       if (tasksError) throw tasksError;
@@ -554,12 +557,21 @@ export function ProjectDetail() {
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from("tasks")
         .delete()
-        .eq("id", taskId);
+        .eq("id", taskId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting task:", error);
+        throw error;
+      }
+
+      // Verify the task was actually deleted
+      if (!data || data.length === 0) {
+        throw new Error("Task deletion failed - no rows were deleted");
+      }
 
       toast({
         title: "Success",
@@ -567,11 +579,11 @@ export function ProjectDetail() {
       });
 
       fetchProjectDetails();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting task:", error);
       toast({
         title: "Error",
-        description: "Failed to delete task",
+        description: error.message || "Failed to delete task. Please try again.",
         variant: "destructive",
       });
     }
@@ -579,12 +591,21 @@ export function ProjectDetail() {
 
   const handleDeleteAssignment = async (assignmentId: string) => {
     try {
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from("tasks")
         .delete()
-        .eq("id", assignmentId);
+        .eq("id", assignmentId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting assignment:", error);
+        throw error;
+      }
+
+      // Verify the assignment was actually deleted
+      if (!data || data.length === 0) {
+        throw new Error("Assignment deletion failed - no rows were deleted");
+      }
 
       toast({
         title: "Success",
@@ -592,11 +613,11 @@ export function ProjectDetail() {
       });
 
       fetchProjectDetails();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting assignment:", error);
       toast({
         title: "Error",
-        description: "Failed to delete assignment",
+        description: error.message || "Failed to delete assignment. Please try again.",
         variant: "destructive",
       });
     }

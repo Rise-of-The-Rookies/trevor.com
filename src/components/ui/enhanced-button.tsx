@@ -18,7 +18,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary-hover shadow-sm",
         ghost: "hover:bg-secondary hover:text-secondary-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        // Enhanced variants for TeamSpark
+        // Enhanced variants for Trevor
         hero: "bg-gradient-hero text-primary-foreground hover:shadow-glow transform hover:scale-[1.02] transition-all duration-300 shadow-lg",
         points: "bg-gradient-points text-points-foreground hover:shadow-glow transform hover:scale-[1.02] transition-all duration-200 shadow-sm",
         accent: "bg-gradient-accent text-accent-foreground hover:bg-accent-hover shadow-sm",

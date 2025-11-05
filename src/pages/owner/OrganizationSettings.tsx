@@ -142,7 +142,7 @@ export function OrganizationSettings() {
     setSaving(true);
     try {
       // First, try to save with work hours
-      const { error: fullUpdateError } = await supabase
+      const { error: fullUpdateError, data: fullUpdateData } = await supabase
         .from("organizations")
         .update({
           name: formData.name,
@@ -152,19 +152,31 @@ export function OrganizationSettings() {
           early_threshold_minutes: formData.early_threshold_minutes,
           late_threshold_minutes: formData.late_threshold_minutes,
         })
-        .eq("id", organization.id);
+        .eq("id", organization.id)
+        .select();
 
       // If work hours columns don't exist, fall back to basic update
       if (fullUpdateError && fullUpdateError.code === 'PGRST204') {
-        const { error: basicUpdateError } = await supabase
+        const { error: basicUpdateError, data: basicUpdateData } = await supabase
           .from("organizations")
           .update({
             name: formData.name,
             description: formData.description,
           })
-          .eq("id", organization.id);
+          .eq("id", organization.id)
+          .select();
 
         if (basicUpdateError) throw basicUpdateError;
+
+        // Verify the update actually happened
+        if (!basicUpdateData || basicUpdateData.length === 0) {
+          throw new Error("Update failed - no rows were updated");
+        }
+
+        // Update local state
+        const updatedOrg = basicUpdateData[0];
+        setOrganization(updatedOrg as Organization);
+        setContextOrganization({ ...contextOrganization, ...updatedOrg });
 
         toast({
           title: "Partial Save",
@@ -174,17 +186,30 @@ export function OrganizationSettings() {
         return;
       }
 
-      if (fullUpdateError) throw fullUpdateError;
+      if (fullUpdateError) {
+        console.error("Error updating organization:", fullUpdateError);
+        throw fullUpdateError;
+      }
+
+      // Verify the update actually happened
+      if (!fullUpdateData || fullUpdateData.length === 0) {
+        throw new Error("Update failed - no rows were updated");
+      }
+
+      // Update local state
+      const updatedOrg = fullUpdateData[0];
+      setOrganization(updatedOrg as Organization);
+      setContextOrganization({ ...contextOrganization, ...updatedOrg });
 
       toast({
         title: "Settings saved",
         description: "Organization settings updated successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving settings:", error);
       toast({
         title: "Error",
-        description: "Failed to save settings",
+        description: error.message || "Failed to save settings. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -215,12 +240,21 @@ export function OrganizationSettings() {
         .eq("user_id", user.id);
 
       // Delete the organization (cascade deletes should handle related records)
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from("organizations")
         .delete()
-        .eq("id", organization.id);
+        .eq("id", organization.id)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting organization:", error);
+        throw error;
+      }
+
+      // Verify the organization was actually deleted
+      if (!data || data.length === 0) {
+        throw new Error("Organization deletion failed - no rows were deleted");
+      }
 
       toast({
         title: "Organization deleted",
@@ -232,11 +266,11 @@ export function OrganizationSettings() {
       
       // Redirect to home page (will automatically show OrganizationSelector)
       navigate("/");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting organization:", error);
       toast({
         title: "Error",
-        description: "Failed to delete organization. Please try again.",
+        description: error.message || "Failed to delete organization. Please try again.",
         variant: "destructive",
       });
       setDeleting(false);
