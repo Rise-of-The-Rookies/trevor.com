@@ -233,7 +233,7 @@ export function Teams() {
         return;
       }
 
-      if (!formData.supervisor_id || formData.supervisor_id === "unassigned") {
+      if (!formData.supervisor_id) {
         toast({
           title: "Error",
           description: "Please assign a supervisor to the team",
@@ -252,9 +252,7 @@ export function Teams() {
         created_by: user.id,
       };
 
-      if (formData.supervisor_id && formData.supervisor_id !== "unassigned") {
-        teamData.supervisor_id = formData.supervisor_id;
-      }
+      teamData.supervisor_id = formData.supervisor_id;
 
       // @ts-ignore - teams table will be available after migration
       const { data, error } = await (supabase as any)
@@ -265,14 +263,12 @@ export function Teams() {
 
       if (error) throw error;
 
-      // If supervisor is assigned, add them to team_members
-      if (formData.supervisor_id && formData.supervisor_id !== "unassigned") {
-        // @ts-ignore - team_members table will be available after migration
-        await (supabase as any).from("team_members").insert({
-          team_id: data.id,
-          user_id: formData.supervisor_id,
-        });
-      }
+      // Add supervisor to team_members
+      // @ts-ignore - team_members table will be available after migration
+      await (supabase as any).from("team_members").insert({
+        team_id: data.id,
+        user_id: formData.supervisor_id,
+      });
 
       toast({
         title: "Success",
@@ -713,10 +709,9 @@ export function Teams() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a supervisor" />
+                  <SelectValue placeholder="Select a Supervisor" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {supervisors.map((supervisor) => (
                     <SelectItem key={supervisor.user_id} value={supervisor.user_id}>
                       {supervisor.users.full_name || supervisor.users.email}
