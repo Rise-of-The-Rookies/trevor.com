@@ -287,13 +287,16 @@ export function ProjectDetail() {
           });
       }
 
+      // Small delay to ensure database transaction completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Refresh project details
       await fetchProjectDetails();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating task:", error);
       toast({
         title: "Error",
-        description: "Failed to update task",
+        description: error.message || "Failed to update task. Please try again.",
         variant: "destructive",
       });
     }
@@ -348,13 +351,16 @@ export function ProjectDetail() {
         });
       }
 
+      // Small delay to ensure database transaction completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Refresh project details
       await fetchProjectDetails();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error marking task as done:", error);
       toast({
         title: "Error",
-        description: "Failed to mark task as done",
+        description: error.message || "Failed to mark task as done. Please try again.",
         variant: "destructive",
       });
     }

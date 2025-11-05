@@ -351,10 +351,27 @@ export function EmployeeDashboard({ organization, onLogout, onClockOut }: Employ
           });
       }
 
+      // Small delay to ensure database transaction completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Refresh data after completion
       await fetchUserTasks();
       await fetchUserStats();
-    } catch (error) {
+      
+      // Show success message if not already shown
+      if (action !== "complete") {
+        toast({
+          title: "Task Updated",
+          description: "Task status has been updated successfully",
+        });
+      }
+    } catch (error: any) {
       console.error("Error updating task:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update task. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
