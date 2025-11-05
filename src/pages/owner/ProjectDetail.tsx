@@ -275,6 +275,7 @@ export function ProjectDetail() {
           created_at,
           assignee_id,
           task_type,
+          completion_points,
           assignee:users!tasks_assignee_id_fkey(
             full_name,
             email
@@ -1216,10 +1217,10 @@ export function ProjectDetail() {
                                   <span>{task.assignee.full_name}</span>
                                 </div>
                               )}
-                                  {task.completion_points && task.completion_points > 0 && (
-                                    <div className="flex items-center gap-1 text-amber-600">
-                                      <Coins className="w-3 h-3" />
-                                      <span>{task.completion_points} points</span>
+                              {task.completion_points && task.completion_points > 0 && (
+                                <div className="flex items-center gap-1 text-amber-600">
+                                  <Coins className="w-3 h-3" />
+                                  <span>{task.completion_points} points</span>
                                 </div>
                               )}
                               {task.due_date && (
@@ -1230,8 +1231,6 @@ export function ProjectDetail() {
                                   </span>
                                 </div>
                               )}
-                                </div>
-                              </div>
                             </div>
                         <div className="flex items-center gap-2 ml-4">
                           <Badge variant={getPriorityColor(task.priority)} className="text-xs">
