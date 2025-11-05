@@ -233,6 +233,15 @@ export function Teams() {
         return;
       }
 
+      if (!formData.supervisor_id || formData.supervisor_id === "unassigned") {
+        toast({
+          title: "Error",
+          description: "Please assign a supervisor to the team",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
