@@ -411,8 +411,23 @@ export function OrganizationSettings() {
                   type="number"
                   min="0"
                   max="60"
-                  value={formData.early_threshold_minutes}
-                  onChange={(e) => setFormData({ ...formData, early_threshold_minutes: parseInt(e.target.value) || 0 })}
+                  value={formData.early_threshold_minutes === 0 ? "" : formData.early_threshold_minutes}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      setFormData({ ...formData, early_threshold_minutes: 0 });
+                    } else {
+                      const numValue = parseInt(value) || 0;
+                      const clampedValue = Math.min(Math.max(numValue, 0), 60);
+                      setFormData({ ...formData, early_threshold_minutes: clampedValue });
+                    }
+                  }}
+                  onFocus={(e) => {
+                    if (e.target.value === "0" || e.target.value === "") {
+                      e.target.select();
+                    }
+                  }}
+                  placeholder="Enter minutes"
                 />
                 <p className="text-xs text-muted-foreground">
                   Clock-in this many minutes before start time = early
@@ -426,8 +441,23 @@ export function OrganizationSettings() {
                   type="number"
                   min="0"
                   max="60"
-                  value={formData.late_threshold_minutes}
-                  onChange={(e) => setFormData({ ...formData, late_threshold_minutes: parseInt(e.target.value) || 0 })}
+                  value={formData.late_threshold_minutes === 0 ? "" : formData.late_threshold_minutes}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      setFormData({ ...formData, late_threshold_minutes: 0 });
+                    } else {
+                      const numValue = parseInt(value) || 0;
+                      const clampedValue = Math.min(Math.max(numValue, 0), 60);
+                      setFormData({ ...formData, late_threshold_minutes: clampedValue });
+                    }
+                  }}
+                  onFocus={(e) => {
+                    if (e.target.value === "0" || e.target.value === "") {
+                      e.target.select();
+                    }
+                  }}
+                  placeholder="Enter minutes"
                 />
                 <p className="text-xs text-muted-foreground">
                   Clock-in this many minutes after start time = late
