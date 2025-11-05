@@ -123,9 +123,26 @@ export function AttendanceHistory() {
       if (!organization) return;
       setLoading(true);
 
-      // Fetch attendance records from last 30 days
+      // Fetch organization details to get creation date
+      const { data: orgData, error: orgError } = await supabase
+        .from("organizations")
+        .select("created_at")
+        .eq("id", organization.id)
+        .single();
+
+      if (orgError) throw orgError;
+
+      // Use the organization's creation date or 30 days ago, whichever is more recent
+      const orgCreatedDate = orgData?.created_at ? new Date(orgData.created_at) : null;
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      // Start from the organization creation date, or 30 days ago if org was created more than 30 days ago
+      const startDate = orgCreatedDate && orgCreatedDate > thirtyDaysAgo 
+        ? orgCreatedDate 
+        : thirtyDaysAgo;
+      
+      const startDateString = startDate.toISOString().split('T')[0];
       const today = new Date().toISOString().split('T')[0];
 
       // Fetch all organization members
@@ -147,7 +164,7 @@ export function AttendanceHistory() {
         .from("attendance_checkins")
         .select("*")
         .eq("org_id", organization.id)
-        .gte("local_date", thirtyDaysAgo.toISOString().split('T')[0])
+        .gte("local_date", startDateString)
         .order("local_date", { ascending: false })
         .order("clock_in_at", { ascending: false });
 
@@ -155,13 +172,18 @@ export function AttendanceHistory() {
 
       const allRecords: AttendanceRecord[] = [];
 
-      // Generate date range for last 30 days
+      // Generate date range from start date to today
       const dateRange: string[] = [];
-      for (let i = 0; i < 30; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        dateRange.push(date.toISOString().split('T')[0]);
+      const currentDate = new Date();
+      const loopDate = new Date(startDate);
+      
+      while (loopDate <= currentDate) {
+        dateRange.push(loopDate.toISOString().split('T')[0]);
+        loopDate.setDate(loopDate.getDate() + 1);
       }
+      
+      // Reverse to show most recent dates first
+      dateRange.reverse();
 
       // Process each date
       for (const date of dateRange) {
