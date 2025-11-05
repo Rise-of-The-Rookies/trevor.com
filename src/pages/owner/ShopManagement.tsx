@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Plus, Gift, Coins } from "lucide-react";
+import { ArrowLeft, Plus, Gift, Coins, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganization } from "@/contexts/OrganizationContext";
 
@@ -28,6 +29,8 @@ export function ShopManagement() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingReward, setEditingReward] = useState<Reward | null>(null);
   const [newReward, setNewReward] = useState({
     title: "",
     description: "",
@@ -123,6 +126,105 @@ export function ShopManagement() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleUpdateReward = async () => {
+    if (!editingReward) return;
+
+    if (!editingReward.title.trim()) {
+      toast({
+        title: "Error",
+        description: "Reward title is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (editingReward.points_cost <= 0) {
+      toast({
+        title: "Error",
+        description: "Points cost must be greater than 0",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error, data } = await supabase
+        .from("rewards")
+        .update({
+          title: editingReward.title.trim(),
+          description: editingReward.description?.trim() || null,
+          points_cost: editingReward.points_cost,
+          stock: editingReward.stock && editingReward.stock > 0 ? editingReward.stock : null,
+          active: editingReward.active,
+        })
+        .eq("id", editingReward.id)
+        .select();
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        throw new Error("Reward update failed - no rows were updated");
+      }
+
+      toast({
+        title: "Success",
+        description: "Reward updated successfully",
+      });
+
+      setEditDialogOpen(false);
+      setEditingReward(null);
+      fetchRewards();
+    } catch (error: any) {
+      console.error("Error updating reward:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update reward",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteReward = async (rewardId: string) => {
+    try {
+      const { error, data } = await supabase
+        .from("rewards")
+        .delete()
+        .eq("id", rewardId)
+        .select();
+
+      if (error) {
+        console.error("Error deleting reward:", error);
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error("Reward deletion failed - no rows were deleted");
+      }
+
+      toast({
+        title: "Success",
+        description: "Reward deleted successfully",
+      });
+
+      fetchRewards();
+    } catch (error: any) {
+      console.error("Error deleting reward:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete reward. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditClick = (reward: Reward) => {
+    setEditingReward({
+      ...reward,
+      stock: reward.stock ?? 0,
+    });
+    setEditDialogOpen(true);
   };
 
   const handleToggleActive = async (rewardId: string, currentActive: boolean) => {
@@ -273,6 +375,108 @@ export function ShopManagement() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+
+            {/* Edit Reward Dialog */}
+            <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Reward</DialogTitle>
+                  <DialogDescription>
+                    Update the reward details
+                  </DialogDescription>
+                </DialogHeader>
+                {editingReward && (
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-title">
+                        Title <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="edit-title"
+                        value={editingReward.title}
+                        onChange={(e) => setEditingReward({ ...editingReward, title: e.target.value })}
+                        placeholder="Enter reward title"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-description">Description</Label>
+                      <Textarea
+                        id="edit-description"
+                        value={editingReward.description || ""}
+                        onChange={(e) => setEditingReward({ ...editingReward, description: e.target.value })}
+                        placeholder="Enter reward description"
+                        rows={3}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-points-cost">Points Cost</Label>
+                        <Input
+                          id="edit-points-cost"
+                          type="number"
+                          min="1"
+                          value={editingReward.points_cost === 0 ? "" : editingReward.points_cost}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === "") {
+                              setEditingReward({ ...editingReward, points_cost: 0 });
+                            } else {
+                              const numValue = parseInt(value) || 0;
+                              setEditingReward({ ...editingReward, points_cost: numValue });
+                            }
+                          }}
+                          onFocus={(e) => {
+                            if (e.target.value === "0" || e.target.value === "") {
+                              e.target.select();
+                            }
+                          }}
+                          placeholder="Enter points cost"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-stock">Stock (Optional)</Label>
+                        <Input
+                          id="edit-stock"
+                          type="number"
+                          min="0"
+                          value={editingReward.stock === 0 ? "" : editingReward.stock}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === "") {
+                              setEditingReward({ ...editingReward, stock: 0 });
+                            } else {
+                              const numValue = parseInt(value) || 0;
+                              setEditingReward({ ...editingReward, stock: numValue });
+                            }
+                          }}
+                          onFocus={(e) => {
+                            if (e.target.value === "0" || e.target.value === "") {
+                              e.target.select();
+                            }
+                          }}
+                          placeholder="Enter stock amount (leave empty for unlimited)"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="edit-active">Active</Label>
+                      <Switch
+                        id="edit-active"
+                        checked={editingReward.active}
+                        onCheckedChange={(checked) => setEditingReward({ ...editingReward, active: checked })}
+                      />
+                    </div>
+                  </div>
+                )}
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleUpdateReward}>Update Reward</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </header>
@@ -326,6 +530,46 @@ export function ShopManagement() {
                         <span className="font-medium">{reward.stock}</span>
                       </div>
                     )}
+                    <div className="flex items-center gap-2 pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditClick(reward)}
+                        className="flex-1"
+                      >
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="flex-1"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Reward</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{reward.title}"? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteReward(reward.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

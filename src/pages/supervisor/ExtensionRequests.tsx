@@ -206,7 +206,10 @@ export default function ExtensionRequests() {
           status: "pending",
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error requesting extension:", error);
+        throw error;
+      }
 
       toast({
         title: "Extension Request Sent",
@@ -217,11 +220,11 @@ export default function ExtensionRequests() {
       setSelectedAssignment(null);
       setExtensionRequest({ requested_due_at: "", reason: "" });
       fetchExtensionRequests();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error requesting extension:", error);
       toast({
         title: "Error",
-        description: "Failed to request extension",
+        description: error.message || "Failed to request extension. Please try again.",
         variant: "destructive",
       });
     }

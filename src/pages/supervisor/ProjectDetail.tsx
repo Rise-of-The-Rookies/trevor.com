@@ -504,7 +504,10 @@ export function ProjectDetail() {
           status: "pending",
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error requesting extension:", error);
+        throw error;
+      }
 
       toast({
         title: "Extension Request Sent",
@@ -514,11 +517,11 @@ export function ProjectDetail() {
       setExtensionDialogOpen(false);
       setSelectedAssignmentForExtension(null);
       setExtensionRequest({ requested_due_at: "", reason: "" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error requesting extension:", error);
       toast({
         title: "Error",
-        description: "Failed to request extension",
+        description: error.message || "Failed to request extension. Please try again.",
         variant: "destructive",
       });
     }
