@@ -159,9 +159,21 @@ export default function CreateAssignment() {
       // Navigate back to the specific project detail page
       const project = projects.find((p) => p.id === formData.project_id);
       if (project?.name) {
-        navigate(`/owner/projects/${project.name}`);
+        // Check current path to determine if user is admin or owner
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/admin/')) {
+          navigate(`/admin/progress-tracking/${project.name}`);
+        } else {
+          navigate(`/owner/projects/${project.name}`);
+        }
       } else {
-        navigate(`/owner/projects`);
+        // Navigate to appropriate projects list based on current path
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/admin/')) {
+          navigate(`/admin/progress-tracking`);
+        } else {
+          navigate(`/owner/projects`);
+        }
       }
     } catch (error: any) {
       console.error("Error creating assignment:", error);
