@@ -159,13 +159,16 @@ export function Shop() {
         if (stockError) throw stockError;
       }
 
+      // Save reward name before clearing
+      const redeemedRewardName = selectedReward.title;
+
       // Close dialog and reset
       setShowConfirmDialog(false);
       setSelectedReward(null);
 
       toast({
         title: "Success",
-        description: "Redemption request submitted! An admin will process it soon.",
+        description: `Congrats, you have successfully redeemed a '${redeemedRewardName}'!`,
       });
 
       fetchShopData();
