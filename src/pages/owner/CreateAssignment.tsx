@@ -159,10 +159,12 @@ export default function CreateAssignment() {
       // Navigate back to the specific project detail page
       const project = projects.find((p) => p.id === formData.project_id);
       if (project?.name) {
-        // Check current path to determine if user is admin or owner
+        // Check current path to determine if user is admin, supervisor, or owner
         const currentPath = window.location.pathname;
         if (currentPath.includes('/admin/')) {
           navigate(`/admin/progress-tracking/${project.name}`);
+        } else if (currentPath.includes('/supervisor/')) {
+          navigate(`/supervisor/projects/${project.name}`);
         } else {
           navigate(`/owner/projects/${project.name}`);
         }
@@ -171,6 +173,8 @@ export default function CreateAssignment() {
         const currentPath = window.location.pathname;
         if (currentPath.includes('/admin/')) {
           navigate(`/admin/progress-tracking`);
+        } else if (currentPath.includes('/supervisor/')) {
+          navigate(`/supervisor/projects`);
         } else {
           navigate(`/owner/projects`);
         }
