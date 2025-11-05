@@ -60,6 +60,7 @@ interface Task {
   created_at: string;
   assignee_id?: string;
   completion_points?: number;
+  task_type?: 'task' | 'assignment';
   assignee?: {
     full_name: string;
     email: string;
@@ -293,13 +294,17 @@ export function ProjectDetail() {
         if (task.status !== 'done' && task.due_date && new Date(task.due_date) < new Date()) {
           return {
             ...task,
-            status: 'overdue' as const
+            status: 'overdue' as const,
+            task_type: (task.task_type || 'task') as 'task' | 'assignment'
           };
         }
-        return task;
+        return {
+          ...task,
+          task_type: (task.task_type || 'task') as 'task' | 'assignment'
+        };
       });
 
-      setTasks(tasksWithOverdueStatus);
+      setTasks(tasksWithOverdueStatus as Task[]);
 
       // Fetch assignments (stored in tasks table with task_type = 'assignment')
       const { data: assignmentsData, error: assignmentsError } = await supabase
@@ -1232,50 +1237,52 @@ export function ProjectDetail() {
                                 </div>
                               )}
                             </div>
-                        <div className="flex items-center gap-2 ml-4">
-                          <Badge variant={getPriorityColor(task.priority)} className="text-xs">
-                            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                          </Badge>
-                          <Badge className={`${getStatusColor(task.status)} text-xs`}>
-                            {formatStatusText(task.status)}
-                          </Badge>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Task</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete "{task.title}"? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteTask(task.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          </div>
+                          <div className="flex items-center gap-2 ml-4">
+                            <Badge variant={getPriorityColor(task.priority)} className="text-xs">
+                              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                            </Badge>
+                            <Badge className={`${getStatusColor(task.status)} text-xs`}>
+                              {formatStatusText(task.status)}
+                            </Badge>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Task</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete "{task.title}"? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteTask(task.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-                </div>
-              </CardContent>
-            </Card>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
           </TabsContent>
 
           {/* Assignments Tab */}
