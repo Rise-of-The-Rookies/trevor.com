@@ -50,20 +50,23 @@ export default function CreateProject() {
 
       setCheckingName(true);
       try {
+        const trimmedName = formData.name.trim();
         const { data, error } = await supabase
           .from("projects")
           .select("id, name")
-          .eq("name", formData.name.trim())
-          .eq("organization_id", organization.id)
-          .maybeSingle();
+          .eq("organization_id", organization.id);
 
-        if (error && error.code !== "PGRST116") {
-          // PGRST116 is "no rows returned" which is expected when no duplicate exists
+        if (error) {
           console.error("Error checking duplicate name:", error);
           return;
         }
 
-        if (data) {
+        // Check for case-insensitive duplicate
+        const isDuplicate = data?.some(
+          (project) => project.name.toLowerCase() === trimmedName.toLowerCase()
+        );
+
+        if (isDuplicate) {
           setNameError("This project name has been used, try another one");
         } else {
           setNameError("");
@@ -199,7 +202,7 @@ export default function CreateProject() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Enter project name"
                   required
-                  disabled={loading || checkingName}
+                  disabled={loading}
                   className={nameError ? "border-destructive" : ""}
                 />
                 {nameError ? (
