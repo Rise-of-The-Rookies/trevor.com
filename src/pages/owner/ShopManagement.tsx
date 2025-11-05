@@ -213,8 +213,22 @@ export function ShopManagement() {
                         id="points-cost"
                         type="number"
                         min="1"
-                        value={newReward.points_cost}
-                        onChange={(e) => setNewReward({ ...newReward, points_cost: parseInt(e.target.value) || 0 })}
+                        value={newReward.points_cost === 0 ? "" : newReward.points_cost}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === "") {
+                            setNewReward({ ...newReward, points_cost: 0 });
+                          } else {
+                            const numValue = parseInt(value) || 0;
+                            setNewReward({ ...newReward, points_cost: numValue });
+                          }
+                        }}
+                        onFocus={(e) => {
+                          if (e.target.value === "0" || e.target.value === "") {
+                            e.target.select();
+                          }
+                        }}
+                        placeholder="Enter points cost"
                       />
                     </div>
                     <div className="space-y-2">
@@ -223,8 +237,22 @@ export function ShopManagement() {
                         id="stock"
                         type="number"
                         min="0"
-                        value={newReward.stock}
-                        onChange={(e) => setNewReward({ ...newReward, stock: parseInt(e.target.value) || 0 })}
+                        value={newReward.stock === 0 ? "" : newReward.stock}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === "") {
+                            setNewReward({ ...newReward, stock: 0 });
+                          } else {
+                            const numValue = parseInt(value) || 0;
+                            setNewReward({ ...newReward, stock: numValue });
+                          }
+                        }}
+                        onFocus={(e) => {
+                          if (e.target.value === "0" || e.target.value === "") {
+                            e.target.select();
+                          }
+                        }}
+                        placeholder="Enter stock amount (leave empty for unlimited)"
                       />
                     </div>
                   </div>

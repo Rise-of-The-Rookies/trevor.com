@@ -97,13 +97,22 @@ export function TeamManagement() {
     }
     
     try {
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from("organization_members")
         .update({ role: newRole })
         .eq("organization_id", organization.id)
-        .eq("user_id", userId);
+        .eq("user_id", userId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating role:", error);
+        throw error;
+      }
+
+      // Verify the role was actually updated
+      if (!data || data.length === 0) {
+        throw new Error("Role update failed - no rows were updated");
+      }
 
       toast({
         title: "Success",
@@ -111,11 +120,11 @@ export function TeamManagement() {
       });
 
       fetchTeamMembers();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating role:", error);
       toast({
         title: "Error",
-        description: "Failed to update member role",
+        description: error.message || "Failed to update member role. Please try again.",
         variant: "destructive",
       });
     }
