@@ -1,202 +1,254 @@
-# Trevor - Transform Your Team's Productivity
+Trevor – Transform Your Team’s Productivity 🚀
+Overview
 
-## Overview
+Trevor is a comprehensive team productivity and workflow management platform that gamifies the workplace experience.
+It unites task management, time tracking, collaboration, and a rewards system into a single intuitive application — empowering organizations to boost efficiency, engagement, and accountability.
 
-Trevor is a comprehensive team productivity and workflow management application that gamifies your team's work experience. It combines task management, time tracking, team collaboration, and a rewards system to make work engaging and track progress effectively.
+Trevor supports multiple user roles — Owner, Admin, Supervisor, and Employee — each with customized permissions and tools.
+With real-time collaboration, attendance tracking, and performance analytics, Trevor helps teams stay motivated while driving measurable results.
 
-The platform supports multiple user roles (Owner, Admin, Supervisor, and Employee), each with tailored features and permissions. With real-time collaboration, attendance tracking, project management, and a gamified points system, Trevor helps organizations boost productivity while keeping teams motivated.
+Demo Accounts
 
-## Demo Accounts
+Explore the application using these sample accounts:
 
-You can use the following demo accounts to explore different roles in the application:
+Role	Email	Password
+Owner	owner1@gmail.com
+	12345678
+Admin	admin1@gmail.com
+	12345678
+Supervisor	supervisor1@gmail.com
+	12345678
+Employee	employee1@gmail.com
+	12345678
+Key Features
+🏢 Owner Role
 
-| Role | Email | Password |
-|------|-------|----------|
-| Owner | owner1@gmail.com | 12345678 |
-| Admin | admin1@gmail.com | 12345678 |
-| Supervisor | supervisor1@gmail.com | 12345678 |
-| Employee | employee1@gmail.com | 12345678 |
+Owners have full control over the organization.
 
-## Features
+Organization Management
 
-### Owner Role
+Create and manage projects and teams
 
-Owners have full control over the organization with the following capabilities:
+Configure organization settings
 
-- **Organization Management**
-  - Create and manage projects
-  - Configure organization settings
-  - View organization-wide analytics and statistics
-  - Manage organization members and invitations
+Access company-wide analytics and reports
 
-- **Project & Task Management**
-  - Create projects, tasks, and assignments
-  - View all projects and tasks across the organization
-  - Monitor task completion rates and project progress
+Manage members and invitations
 
-- **Team Management**
-  - Create and manage teams
-  - View team statistics and performance
-  - Manage team memberships
+Project & Task Management
 
-- **Time & Attendance**
-  - View attendance reports and time logging data
-  - Monitor daily attendance statistics
-  - Track employee time management
+Create, assign, and track projects and tasks
 
-- **Rewards System**
-  - Manage the rewards shop
-  - Configure rewards and point values
-  - View redemption history
+View organization-wide progress and completion rates
 
-- **Analytics**
-  - Access comprehensive organization analytics
-  - View completion rates and productivity metrics
-  - Monitor team performance trends
+Team Management
 
-### Admin Role
+Create and manage teams
 
-Admins have administrative privileges to manage teams and operations:
+Track team performance and membership
 
-- **Member Management**
-  - Add, remove, and manage organization members
-  - Update member roles and permissions
-  - Handle team assignments
+Time & Attendance
 
-- **Team Management**
-  - Create and manage teams
-  - Assign supervisors to teams
-  - View team performance metrics
+View attendance reports and logs
 
-- **Task & Assignment Management**
-  - Create tasks and assignments
-  - Assign tasks to employees
-  - Monitor task progress and completion
+Monitor daily and historical time records
 
-- **Time Logging**
-  - View attendance reports
-  - Monitor employee time tracking
-  - Generate time logging reports
+Rewards System
 
-- **Shop Management**
-  - Manage rewards shop items
-  - Configure point values and rewards
-  - Handle reward redemptions
+Manage the rewards shop and point system
 
-- **Analytics**
-  - View team productivity metrics
-  - Monitor attendance statistics
-  - Track project and task completion rates
+View and approve reward redemptions
 
-### Supervisor Role
+Analytics
 
-Supervisors oversee teams and manage day-to-day operations:
+Access full organizational analytics
 
-- **Task Management**
-  - Create tasks for team members
-  - Assign tasks to employees
-  - Monitor task progress and status
+Monitor productivity metrics and team trends
 
-- **Team Oversight**
-  - View team members and their activities
-  - Monitor team efficiency and productivity
-  - Track ongoing assignments
+⚙️ Admin Role
 
-- **Extension Requests**
-  - Review and approve/reject extension requests
-  - Manage deadline extensions for tasks
-  - Handle employee requests
+Admins oversee operational efficiency and user management.
 
-- **Time Tracking**
-  - Clock in/out functionality
-  - View logging history
-  - Track attendance status
+Member Management
 
-- **Assignment Management**
-  - Create and manage assignments
-  - Track assignment completion
-  - View assignment statistics
+Add, remove, and update member roles
 
-- **Rewards**
-  - Access rewards shop
-  - View earned points and rewards
-  - Redeem rewards
+Assign teams and manage permissions
 
-### Employee Role
+Team Management
 
-Employees have access to their assigned work and personal productivity tools:
+Create and organize teams
 
-- **Task Management**
-  - View assigned tasks
-  - Start, pause, and complete tasks
-  - Track task progress and deadlines
-  - View task details and descriptions
+Assign supervisors
 
-- **Time Tracking**
-  - Clock in/out functionality
-  - View attendance history
-  - Track logged hours
+Monitor performance statistics
 
-- **Extension Requests**
-  - Request deadline extensions for tasks
-  - View extension request status
-  - Manage pending requests
+Task & Assignment Management
 
-- **Team Collaboration**
-  - View team members and online presence
-  - Access team information
-  - Collaborate on projects
+Create and assign tasks
 
-- **Projects**
-  - View assigned projects
-  - Access project details and phases
-  - Track project progress
+Monitor completion and progress reports
 
-- **Rewards System**
-  - Earn points by completing tasks
-  - Browse and redeem rewards from the shop
-  - View earned rewards and point balance
-  - Track reward history
+Time Logging
 
-- **Notifications**
-  - Receive real-time notifications
-  - View extension request updates
-  - Stay informed about task changes
+View attendance reports
 
-## Technology Stack
+Generate time tracking summaries
 
-This project is built with modern web technologies:
+Shop Management
 
-### Frontend
-- **React** - UI library for building interactive user interfaces
-- **TypeScript** - Type-safe JavaScript for better code quality
-- **Vite** - Fast build tool and development server
-- **React Router** - Client-side routing for navigation
-- **Tailwind CSS** - Utility-first CSS framework for styling
-- **shadcn-ui** - High-quality React component library
-- **Radix UI** - Unstyled, accessible component primitives
-- **Lucide React** - Beautiful icon library
-- **Recharts** - Composable charting library for data visualization
+Configure rewards and point values
 
-### Backend & Database
-- **Supabase** - Backend-as-a-Service platform providing:
-  - PostgreSQL database
-  - Real-time subscriptions
-  - Authentication
-  - Row Level Security (RLS)
+Handle redemption requests
 
-### State Management & Forms
-- **TanStack Query** - Data fetching and caching
-- **React Hook Form** - Performant form library
-- **Zod** - TypeScript-first schema validation
+Analytics
 
-### Additional Libraries
-- **date-fns** - Date utility library
-- **next-themes** - Theme management (dark/light mode)
-- **Sonner** - Toast notification library
-- **React Day Picker** - Date picker component
+View productivity metrics and attendance summaries
 
-### Development Tools
-- **TypeScript ESLint** - Linting and code quality
-- **PostCSS** - CSS processing
-- **Autoprefixer** - CSS vendor prefixing
+Track project and task completion
+
+👨‍💼 Supervisor Role
+
+Supervisors lead teams and oversee daily operations.
+
+Task Management
+
+Create and assign tasks to team members
+
+Track task status and progress
+
+Team Oversight
+
+Monitor team activities and efficiency
+
+Review team assignments and outputs
+
+Extension Requests
+
+Approve or reject task deadline extensions
+
+Manage employee requests
+
+Time Tracking
+
+Clock in/out and monitor attendance
+
+View team time logs
+
+Rewards
+
+Access the rewards shop
+
+View and redeem earned points
+
+👩‍💻 Employee Role
+
+Employees manage their work, track progress, and earn rewards.
+
+Task Management
+
+View assigned tasks
+
+Start, pause, and complete tasks
+
+Track progress and deadlines
+
+Time Tracking
+
+Clock in/out for attendance
+
+View logged hours and history
+
+Extension Requests
+
+Request task extensions
+
+Track request status
+
+Team Collaboration
+
+View team members and availability
+
+Collaborate on shared projects
+
+Projects
+
+Access assigned projects and details
+
+Track project progress by phase
+
+Rewards System
+
+Earn points by completing tasks
+
+Redeem items from the rewards shop
+
+Track points and redemption history
+
+Notifications
+
+Receive real-time alerts for task updates, extensions, and announcements
+
+Technology Stack
+🖥️ Frontend
+
+React – Dynamic and interactive UI framework
+
+TypeScript – Type-safe JavaScript for scalable development
+
+Vite – Lightning-fast build and dev server
+
+React Router – Client-side routing
+
+Tailwind CSS – Utility-first CSS for rapid styling
+
+shadcn/ui – Elegant and accessible UI components
+
+Radix UI – Unstyled primitives for accessibility
+
+Lucide React – Beautiful icon library
+
+Recharts – Interactive charts and data visualization
+
+🗄️ Backend & Database
+
+Supabase (Backend-as-a-Service)
+
+PostgreSQL Database
+
+Real-time subscriptions
+
+Authentication and Authorization
+
+Row Level Security (RLS)
+
+⚙️ State Management & Forms
+
+TanStack Query – Data fetching, caching, and synchronization
+
+React Hook Form – Performant form handling
+
+Zod – Type-safe schema validation
+
+🧩 Additional Libraries
+
+date-fns – Lightweight date utility functions
+
+next-themes – Dark/Light mode management
+
+Sonner – Elegant toast notifications
+
+React Day Picker – Interactive date selection
+
+🧰 Development Tools
+
+TypeScript ESLint – Code linting and quality enforcement
+
+PostCSS – CSS transformations
+
+Autoprefixer – Vendor prefixing for cross-browser support
+
+Summary
+
+Trevor is not just another task manager — it’s a complete productivity ecosystem that combines structure, motivation, and collaboration.
+By turning everyday work into a rewarding experience, Trevor helps organizations transform performance, culture, and engagement from the inside out.
