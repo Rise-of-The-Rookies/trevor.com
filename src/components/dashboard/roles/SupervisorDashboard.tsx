@@ -288,11 +288,12 @@ export function SupervisorDashboard({ organization, onLogout, onClockOut }: Supe
           .from('projects')
           .select('id')
           .eq('organization_id', organization.id),
-        // Fetch extension requests for the current user
+        // Fetch pending extension requests for the current user
         supabase
           .from('extension_requests')
           .select('id')
-          .eq('requester_id', user.id),
+          .eq('requester_id', user.id)
+          .eq('status', 'pending'),
         // Check if user is currently clocked in
         supabase
           .from('attendance_checkins')

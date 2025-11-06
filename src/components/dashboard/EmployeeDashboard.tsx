@@ -167,10 +167,10 @@ export function EmployeeDashboard({ organization, onLogout, onClockOut }: Employ
 
       const isClockedIn = !!clockInData;
 
-      // Fetch extension requests count
+      // Fetch pending extension requests count
       const { data: extensionRequestsData, error: extensionRequestsError } = await supabase
         .from("extension_requests")
-        .select("id", { count: "exact" })
+        .select("id")
         .eq("requester_id", user.id)
         .eq("status", "pending");
 
