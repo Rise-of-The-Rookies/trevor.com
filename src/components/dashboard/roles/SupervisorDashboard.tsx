@@ -389,7 +389,6 @@ export function SupervisorDashboard({ organization, onLogout, onClockOut }: Supe
             </div>
             
             <div className="flex items-center gap-4">
-              <ModeToggle />
               {userId && <NotificationBell userId={userId} />}
               <Link to="/supervisor/shop">
                 <Card variant="points" padding="sm" className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity">
@@ -397,6 +396,7 @@ export function SupervisorDashboard({ organization, onLogout, onClockOut }: Supe
                   <span className="font-semibold">{stats.totalPoints}</span>
                 </Card>
               </Link>
+              <ModeToggle />
               <ClockOutButton 
                 organizationId={organization.id}
                 organizationName={organization.name}

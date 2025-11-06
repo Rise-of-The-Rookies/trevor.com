@@ -442,7 +442,6 @@ export function EmployeeDashboard({ organization, onLogout, onClockOut }: Employ
             </div>
             
             <div className="flex items-center gap-4">
-              <ModeToggle />
               {userId && <NotificationBell userId={userId} />}
               <Link to="/employee/shop">
                 <Card variant="points" padding="sm" className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity">
@@ -450,6 +449,7 @@ export function EmployeeDashboard({ organization, onLogout, onClockOut }: Employ
                   <span className="font-semibold">{stats.points}</span>
                 </Card>
               </Link>
+              <ModeToggle />
               <ClockOutButton 
                 organizationId={organization.id}
                 organizationName={organization.name}
