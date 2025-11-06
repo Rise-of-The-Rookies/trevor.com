@@ -165,13 +165,13 @@ export function AdminDashboard({ organization, onLogout, onClockOut }: AdminDash
             </div>
             
             <div className="flex items-center gap-4">
-              <ModeToggle />
               {userId && <NotificationBell userId={userId} />}
               <Link to="/admin/shop/manage">
                 <Button variant="ghost" size="icon" aria-label="Manage Shop">
                   <Gift className="w-5 h-5" />
                 </Button>
               </Link>
+              <ModeToggle />
               <ClockOutButton 
                 organizationId={organization.id}
                 organizationName={organization.name}
