@@ -494,21 +494,21 @@ export function SupervisorDashboard({ organization, onLogout, onClockOut }: Supe
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                   <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                    <Link to="/supervisor/projects">
-                      <FolderOpen className="w-6 h-6" />
-                      <span>Projects</span>
+                    <Link to="/supervisor/tasks/new">
+                      <Plus className="w-6 h-6" />
+                      <span>Create Task</span>
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col gap-2" asChild>
+                    <Link to="/supervisor/extension-requests">
+                      <CalendarClock className="w-6 h-6" />
+                      <span>Extension Requests</span>
                     </Link>
                   </Button>
                   <Button variant="outline" className="h-20 flex-col gap-2" asChild>
                     <Link to="/supervisor/teams">
                       <Users className="w-6 h-6" />
                       <span>Teams</span>
-                    </Link>
-                  </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                    <Link to="/supervisor/tasks/new">
-                      <Plus className="w-6 h-6" />
-                      <span>Create Task</span>
                     </Link>
                   </Button>
                   <Button variant="outline" className="h-20 flex-col gap-2" asChild>
@@ -521,12 +521,6 @@ export function SupervisorDashboard({ organization, onLogout, onClockOut }: Supe
                     <Link to="/supervisor/shop">
                       <Gift className="w-6 h-6" />
                       <span>Rewards Shop</span>
-                    </Link>
-                  </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                    <Link to="/supervisor/extension-requests">
-                      <CalendarClock className="w-6 h-6" />
-                      <span>Extension Requests</span>
                     </Link>
                   </Button>
                   <Button variant="outline" className="h-20 flex-col gap-2" asChild>

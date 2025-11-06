@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/enhanced-card";
 import { Button } from "@/components/ui/enhanced-button";
@@ -84,6 +84,7 @@ const priorityColors = {
 
 export function EmployeeDashboard({ organization, onLogout, onClockOut }: EmployeeDashboardProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [userId, setUserId] = useState<string>("");
   const [stats, setStats] = useState({
@@ -414,6 +415,47 @@ export function EmployeeDashboard({ organization, onLogout, onClockOut }: Employ
     }
   };
 
+  const handleProjectsClick = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/employee/projects");
+        return;
+      }
+
+      // First, check if we have any active tasks
+      if (tasks.length > 0 && tasks[0].project?.name) {
+        navigate(`/employee/projects/${tasks[0].project.name}`);
+        return;
+      }
+
+      // If no active tasks, fetch all tasks (including completed) to find a project
+      const { data: allTasksData, error: tasksError } = await supabase
+        .from("tasks")
+        .select(`
+          *,
+          project:projects!inner(name, organization_id)
+        `)
+        .eq("assignee_id", user.id)
+        .eq("project.organization_id", organization.id)
+        .eq("task_type", "task")
+        .limit(1);
+
+      if (tasksError) throw tasksError;
+
+      if (allTasksData && allTasksData.length > 0 && allTasksData[0].project?.name) {
+        navigate(`/employee/projects/${allTasksData[0].project.name}`);
+      } else {
+        // No tasks found, navigate to projects list
+        navigate("/employee/projects");
+      }
+    } catch (error) {
+      console.error("Error navigating to projects:", error);
+      // Fallback to projects list on error
+      navigate("/employee/projects");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -546,11 +588,9 @@ export function EmployeeDashboard({ organization, onLogout, onClockOut }: Employ
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                  <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                    <Link to="/employee/projects">
-                      <FolderOpen className="w-6 h-6" />
-                      <span>Projects</span>
-                    </Link>
+                  <Button variant="outline" className="h-20 flex-col gap-2" onClick={handleProjectsClick}>
+                    <FolderOpen className="w-6 h-6" />
+                    <span>Tasks</span>
                   </Button>
                   <Button variant="outline" className="h-20 flex-col gap-2" asChild>
                     <Link to="/employee/teams">
