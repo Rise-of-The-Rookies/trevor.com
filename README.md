@@ -66,3 +66,17 @@ ESLint, PostCSS, Autoprefixer
 
 ## 💡 Summary  
 Trevor transforms everyday work into a **rewarding experience** by blending structure, motivation, and collaboration — empowering teams to perform better and grow together.
+
+---
+
+## 📄 License
+
+Copyright (c) 2025 The Rookies. All Rights Reserved.
+
+This project is proprietary and confidential. This Software is provided as a **DEMO PROTOTYPE** for evaluation and testing purposes only. 
+
+**Permitted Uses:** Testing, evaluation, demonstration, and providing feedback.
+
+**Prohibited Uses:** Commercial use, modification, distribution, reverse engineering, or competitive use.
+
+See [LICENSE](LICENSE) for full terms and conditions.
