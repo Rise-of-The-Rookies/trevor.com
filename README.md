@@ -69,16 +69,6 @@ Trevor transforms everyday work into a **rewarding experience** by blending stru
 
 ---
 
-## 👥 Contributors
-<a href="https://github.com/Bryan2517"><img src="https://github.com/Bryan2517.png" width="72" /></a>
-<a href="https://github.com/EvinKor"><img src="https://github.com/EvinKor.png" width="72" /></a>
-
-<!-- Add names/links below if you prefer text -->
-- [Bryan Low](https://github.com/Bryan2517)
-- [Evin Kor](https://github.com/EvinKor)
-
----
-
 ## 📄 License
 
 Copyright (c) 2025 The Rookies. All Rights Reserved.
